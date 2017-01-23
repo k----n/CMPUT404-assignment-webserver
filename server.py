@@ -32,37 +32,38 @@ class MyWebServer(SocketServer.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip("\r\n")
         command = self.data.split() # [method, request-uri, resource, ...]
-	
-        if command[0] != "GET":
-	        # send 405 error, method is not allowed
-	        # note: methods are case-sensitive
-	        self.request.sendall("HTTP/1.1 405 Method Not Allowed\r\n")
-        else:
-	        # must be a GET request
-	        PATH_PREFIX = "www"
-	        path = os.path.join(os.getcwd(), PATH_PREFIX + command[1])
-	        
-	        if os.path.exists(path):
-	            # note: 302 redirects not implemented
-	            if os.path.isdir(path):
-	                path += "index.html"
-	                
-	            if os.path.isfile(path):
-	                f = open(path)
-	                file_contents = f.read()
-	                f.close()
-	                
-	                filetype = mimetypes.guess_type(path)[0]
-	                
-	                if filetype is not None:
-	                    content_type = "Content-type:" + filetype + ";\r\n" + "\r\n" # extra \r\n to signify end of header
-	                    self.request.sendall("HTTP/1.1 200 OK\r\n" + content_type + file_contents)
-	                else:
-	                    # filetype cannot be identified
-	                    self.request.sendall("HTTP/1.1 404 Not Found\r\n")
-	        else:
-	            # send 404 error, not found
-	            self.request.sendall("HTTP/1.1 404 Not Found\r\n")
+        
+        if command:
+            if command[0] != "GET":
+	            # send 405 error, method is not allowed
+	            # note: methods are case-sensitive
+	            self.request.sendall("HTTP/1.1 405 Method Not Allowed\r\n")
+            else:
+	            # must be a GET request
+	            PATH_PREFIX = "www"
+	            path = os.path.join(os.getcwd(), PATH_PREFIX + command[1])
+	            
+	            if os.path.exists(path):
+	                # note: 302 redirects not implemented
+	                if os.path.isdir(path):
+	                    path += "index.html"
+	                    
+	                if os.path.isfile(path):
+	                    f = open(path)
+	                    file_contents = f.read()
+	                    f.close()
+	                    
+	                    filetype = mimetypes.guess_type(path)[0]
+	                    
+	                    if filetype is not None:
+	                        content_type = "Content-type:" + filetype + ";\r\n" + "\r\n" # extra \r\n to signify end of header
+	                        self.request.sendall("HTTP/1.1 200 OK\r\n" + content_type + file_contents)
+	                    else:
+	                        # filetype cannot be identified
+	                        self.request.sendall("HTTP/1.1 404 Not Found\r\n")
+	            else:
+	                # send 404 error, not found
+	                self.request.sendall("HTTP/1.1 404 Not Found\r\n")
 	    
 
 if __name__ == "__main__":
